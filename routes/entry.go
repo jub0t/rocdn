@@ -60,7 +60,8 @@ func Headshot(db *structs.Storage) echo.HandlerFunc {
 
 		if image.TargetId > 0 {
       if (InMemoryCache) {
-        c.Response().Header().Set("Content-Type", "image/jpeg")
+        c.Response().Header().Set("Content-Type", "image/png")
+        c.Response().Header().Set("Content-Length", strconv.Itoa(len(image.Data)))
         c.Response().Header().Set("Cache-Control", "max-age=31536000") // Cache for 1 year
         c.Response().Write(image.Data)
         c.Response().Flush()
@@ -68,26 +69,40 @@ func Headshot(db *structs.Storage) echo.HandlerFunc {
       } else {
 			  return c.Redirect(302, image.ImageUrl)
       }
-
 		} else {
 			r_image, err := rblx.GetHeadshot(int(user_id), int(size), "png", false)
 
-			if err != nil {
+      if err != nil {
 				return c.JSON(400, structs.Response{
 					Success: true,
 					Message: "User not found",
 				})
 			}
 
-			database.Insert(db, structs.Image{
+      image_data, err := rblx.GetImageDataFromURL(r_image.ImageUrl);
+			
+      if err != nil {
+				return c.JSON(400, structs.Response{
+					Success: true,
+					Message: "Image data could not be retreived",
+				})
+			}
+
+      database.Insert(db, structs.Image{
+        Data: image_data,
 				Size:      int(size),
-				TargetId:  r_image.TargetId,
+        TargetId:  r_image.TargetId,
 				ImageUrl:  r_image.ImageUrl,
 				Timestamp: time.Now().UnixMilli() + time.Hour.Milliseconds()*6,
 			})
 
 			if len(r_image.ImageUrl) > 0 {
-				return c.Redirect(302, r_image.ImageUrl)
+        c.Response().Header().Set("Content-Type", "image/png")
+        c.Response().Header().Set("Content-Length", strconv.Itoa(len(image_data)))
+        c.Response().Header().Set("Cache-Control", "max-age=31536000") // Cache for 1 year
+        c.Response().Write(image.Data)
+        c.Response().Flush()
+        return nil;
 			} else {
 				return c.JSON(400, structs.Response{
 					Success: true,

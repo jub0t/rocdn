@@ -3,6 +3,7 @@ package rblx
 import (
 	"encoding/json"
 	"fmt"
+  "io"
 	"io/ioutil"
 	"net/http"
 	"rblx/structs"
@@ -58,4 +59,26 @@ func GetAvatar(user_id int, size int, format string, circle bool) (structs.Roblo
 			}
 		}
 	}
+}
+
+func GetImageDataFromURL(url string) ([]byte, error) {
+    // Make a GET request to the image URL
+    resp, err := http.Get(url)
+    if err != nil {
+        return nil, err
+    }
+    defer resp.Body.Close()
+
+    // Check if the response status code is OK
+    if resp.StatusCode != http.StatusOK {
+        return nil, fmt.Errorf("failed to fetch image: %s", resp.Status)
+    }
+
+    // Read the response body into a byte slice
+    imageData, err := io.ReadAll(resp.Body)
+    if err != nil {
+        return nil, err
+    }
+
+    return imageData, nil
 }
