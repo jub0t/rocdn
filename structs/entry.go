@@ -15,10 +15,11 @@ type Response struct {
 }
 
 type Image struct {
-	Size      int    `json:"size"`
-	TargetId  int    `json:"targetId"`
-	ImageUrl  string `json:"imageUrl"`
-	Timestamp int64  `json:"timestamp"`
+    Size      int    `json:"size"`
+    TargetId  int    `json:"targetId"`
+    ImageUrl  string `json:"imageUrl"`
+    Timestamp int64  `json:"timestamp"`
+    Data      []byte `json:"data"`
 }
 
 type RobloxImage struct {
