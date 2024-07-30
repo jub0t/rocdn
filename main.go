@@ -18,6 +18,7 @@ func main() {
 
 	// Echo instance
 	e := echo.New()
+  e.Logger.SetLevel(0)
 
 	// Middleware
 	e.Use(middleware.Recover())
